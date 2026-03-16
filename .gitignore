@@ -1,7 +1,7 @@
-./*.sql
-./testfile
-./testoutput
-./*.pgn
-./*.pgn.bak
+*.sql
+testfile
+testoutput
+*.pgn
+*.pgn.bak
 .zig-cache
 /bin
