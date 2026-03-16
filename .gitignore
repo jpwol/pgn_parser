@@ -3,3 +3,5 @@
 ./testoutput
 ./*.pgn
 ./*.pgn.bak
+.zig-cache
+/bin
