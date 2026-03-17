@@ -5,3 +5,4 @@ testoutput
 *.pgn.bak
 .zig-cache
 /bin
+test*
