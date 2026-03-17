@@ -6,6 +6,7 @@ mariadb < ./schema.sql
 
 if [[ -f $INSERT_FILE ]]; then
   mariadb chess_db < $INSERT_FILE
+  exit $?
 else
   echo "error: file not found"
   exit 1
