@@ -13,7 +13,6 @@ pub fn main() !void {
     var ww = stdout.writer(&.{});
     var ew = stderr.writer(&buf);
     const writer = &ww.interface;
-    // _ = writer;
     const err_writer = &ew.interface;
 
     const args = try std.process.argsAlloc(allocator);
@@ -65,9 +64,11 @@ pub fn main() !void {
         if (trimmed.len == 0) {
             if (state == .in_moves) {
                 if (g.move_count > 0 and g.white.len > 0 and g.black.len > 0) {
-                    try emitGameSQL(&g, game_id, writer);
-                    // try writer.flush();
-                    game_id += 1;
+                    if (isGameValid(&g)) {
+                        try emitGameSQL(&g, game_id, writer);
+                        game_id += 1;
+                    }
+
                     g = std.mem.zeroes(Game);
                     _ = arena.reset(.retain_capacity);
 
@@ -76,7 +77,6 @@ pub fn main() !void {
 
                     move_number = 0;
                     next_player = 'W';
-                    // ply = 0;
                 }
                 state = .waiting;
             } else if (state == .in_headers) {
@@ -103,24 +103,15 @@ pub fn main() !void {
         var clean_line: [1024]u8 = undefined;
         const clean_len = stripCommentsAndVariations(trimmed, &clean_line, &depth_curly, &depth_paren);
 
-        // var fixed_line: [1024]u8 = undefined;
-        // const fixed_len = fixMoveNumbers(clean_line[0..clean_len], &fixed_line);
-
         var iter = std.mem.tokenizeAny(u8, clean_line[0..clean_len], " \t.");
         while (iter.next()) |token| {
-            if (std.mem.endsWith(u8, token, ".")) {
+            if (std.mem.eql(u8, token, ".")) {
+                continue;
+            } else if (isMoveNumber(token)) {
                 move_number = parseMoveNumber(token);
-
-                var dot_count: u8 = 0;
-                var j = token.len;
-                while (j > 0 and token[j - 1] == '.') {
-                    dot_count += 1;
-                    j -= 1;
-                }
-
-                next_player = if (dot_count >= 3) 'B' else 'W';
             } else {
                 if (token.len == 0 or token.len > 10) continue;
+                if (token[0] == '$') continue;
                 if (std.mem.eql(u8, token, "1-0") or
                     std.mem.eql(u8, token, "0-1") or
                     std.mem.eql(u8, token, "1/2-1/2") or
@@ -128,13 +119,10 @@ pub fn main() !void {
                 {
                     continue;
                 }
-                const valid_starts = "KQRBNabcdefghO";
-                if (std.mem.indexOfScalar(u8, valid_starts, token[0]) == null) continue;
 
                 if (g.move_count >= g.moves.len) break; // safety!
                 var m = &g.moves[g.move_count];
-                // ply += 1;
-                // m.ply = ply;
+
                 m.move_number = move_number;
                 m.player = next_player;
                 m.move_text = try arena.allocator().dupe(u8, token);
@@ -149,13 +137,25 @@ pub fn main() !void {
     }
 
     if (g.move_count > 0 and g.white.len > 0 and g.black.len > 0) {
-        try emitGameSQL(&g, game_id, writer);
+        if (isGameValid(&g)) {
+            try emitGameSQL(&g, game_id, writer);
+        }
     }
     try writer.writeAll("ALTER TABLE moves ENABLE KEYS;\n");
     try writer.writeAll("ALTER TABLE games ENABLE KEYS;\n");
     try writer.writeAll("ALTER TABLE players ENABLE KEYS;\n");
     try writer.writeAll("COMMIT;\n");
     try writer.flush();
+}
+
+fn isMoveNumber(token: []const u8) bool {
+    var isNumber: bool = true;
+    for (token) |c| {
+        if (!std.ascii.isDigit(c)) {
+            isNumber = false;
+        }
+    }
+    return isNumber;
 }
 
 fn extractHeader(line: []const u8, alloc: std.mem.Allocator) []const u8 {
@@ -197,11 +197,11 @@ fn fixMoveNumbers(line: []const u8, out: *[1024]u8) usize {
     while (i < line.len) {
         if (i + 2 < line.len and
             std.ascii.isDigit(line[i]) and
-            line[i+1] == ' ' and
-            line[i+2] == '.')
+            line[i + 1] == ' ' and
+            line[i + 2] == '.')
         {
             out[len] = line[i];
-            out[len+1] = '.';
+            out[len + 1] = '.';
             len += 2;
             i += 3;
         } else {
@@ -250,6 +250,18 @@ fn emitEscaped(writer: *Writer, s: []const u8) !void {
     }
 
     try writer.writeAll(s[start..]);
+}
+
+fn isGameValid(g: *Game) bool {
+    if (g.white.len == 0 or g.black.len == 0) return false;
+
+    for (1..g.move_count) |i| {
+        const a = g.moves[i].move_number;
+        const b = g.moves[i-1].move_number;
+        const diff = if (a > b) a - b else b - a;
+        if (diff > 2) return false;
+    }
+    return true;
 }
 
 fn emitGameSQL(g: *Game, game_id: u32, writer: *Writer) !void {
