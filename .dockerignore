@@ -1,0 +1,7 @@
+output.sql
+bin/
+.zig-cache/
+zig-out/
+.git/
+*.pgn
+*.bak
