@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
+source "$(dirname "$0")/common.sh"
 
-printf "remove_db.sh\n"
-printf "=====================\n\n"
+start=$SECONDS
+print_header "remove_db.sh"
 
-printf "Removing existing database \"chess\" if it exists...\n"
+print_info "Removing existing database \"chess\" if it exists..."
 mariadb -e "DROP DATABASE IF EXISTS chess"
 
 if [[ $? -eq 0 ]]; then
+  print_success $((SECONDS-start))
   exit $?
 else
-  printf "An error occurred when removing the database.\n"
+  print_error "An error occurred when removing the database."
   exit $?
 fi

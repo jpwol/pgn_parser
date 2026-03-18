@@ -1,47 +1,42 @@
 #!/usr/bin/env bash
+source "$(dirname "$0")/common.sh"
+
+start=$SECONDS
 
 general_error () {
   printf "Please run \"pgn_parser\" with a valid .pgn file before running this script.\n"
 };
 
-printf "generate_loader.sh\n"
-printf "=====================\n\n"
+print_header "generate_loader.sh"
 
 CURRENT_DIR=$(pwd)
 EMIT_DIR="$CURRENT_DIR/emit"
 OUTPUT_FILE="load.sql"
 
-printf "Locating CSV output directory...\n"
+print_info "Locating CSV output directory..."
 if [[ ! -d "$EMIT_DIR" ]]; then
-  printf "error: could not find directory \"emit\"\n"
-  general_error
+  print_error "Could not find directory \"emit\"\n"
+  print_error $(general_error)
   exit 1
 else
-  printf "Located CSV output directory: %s\n" $EMIT_DIR
+  print_info "Located CSV output directory: ${EMIT_DIR}"
 fi
 
-printf "\nGathering CSV files...\n"
+print_info "Gathering CSV files..."
 CSV_FILES=("games.csv" "players.csv" "moves.csv")
 
 for i in "${CSV_FILES[@]}"; do
   if [[ ! -f "$EMIT_DIR/$i" ]]; then
-    printf "Could not locate file %s.\n" $i
-    general_error
+    print_error "Could not locate file ${i}"
+    print_error $(general_error)
     exit 1
   else
-    printf "Located %s in %s\n" "$i" "$EMIT_DIR"
-    # printf "Copying CSV file %s to \"/tmp\"\n" "$i"
-    # cp "$EMIT_DIR/$i" "/tmp"
-
-    if [[ ! -f "/tmp/$i" ]]; then
-      printf "Copy failed. Aborting.\n"
-      exit 1
-    fi
+    print_info "Located ${i} in ${EMIT_DIR}"
   fi
 done
 
 
-printf "\nEmitting SQL to %s\n" "$CURRENT_DIR/$OUTPUT_FILE"
+print_info "Emitting SQL to ${CURRENT_DIR}/${OUTPUT_FILE}"
 
 SQL_STRING="SET NAMES latin1;
 USE chess;
@@ -79,3 +74,5 @@ SET foreign_key_checks = 1;
 "
 
 echo "$SQL_STRING" > $OUTPUT_FILE
+
+print_success $((SECONDS-start))

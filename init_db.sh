@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
+source "$(dirname "$0")/common.sh"
 
-printf "init_db.sh\n"
-printf "=====================\n\n"
+start=$SECONDS
+
+print_header "init_db.sh"
 
 INSERT_FILE="./load.sql"
 
-printf "Initializing database schema...\n"
+print_info "Initializing database schema..."
 mariadb < ./schema.sql
 
-printf "Loading CSV files into database...\n"
+print_info "Loading CSV files into database..."
 if [[ -f $INSERT_FILE ]]; then
   mariadb < $INSERT_FILE
+
+  print_success $((SECONDS-start))
   exit $?
 else
-  echo "error: file not found"
+  print_error "File not found"
   exit 1
 fi

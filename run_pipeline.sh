@@ -1,57 +1,50 @@
 #!/usr/bin/env bash
+source "$(dirname "$0")/common.sh"
+start=$SECONDS
 
 clear
 
 dir=$(pwd)
 
-printf "run_pipeline.sh\n"
-printf "=====================\n\n"
+print_header "run_pipeline.sh"
 
-INFILE="${1:-twic210-874.pgn}"
+INFILE="${1:-infile.pgn}"
 
-printf "Building binary...\n"
+print_info "Building binary"
 zig build || { 
-  printf "Build failed\n"; 
-  printf "Aborting...\n"
+  print_error "Build failed. Aborting..."
   exit 1; 
 }
 
-printf "Executing %s with file \"%s\"\n\n" "$dir/bin/pgn_parser" "$INFILE"
-printf "pgn_parser\n"
-printf "=====================\n\n"
+print_info "Executing ${dir}/bin/pgn_parser with file \"${INFILE}\"" 
+print_header "pgn_parser"
 ./bin/pgn_parser "$INFILE"
+print_success $((SECONDS-start))
 
-printf "\nGenerating loader...\n\n"
+print_info "Generating loader"
 ./generate_loader.sh
 ret=$?
-if [[ $ret -eq 0 ]]; then
-  printf "Done!\n"
-else
-  printf "An error occured when generating loader\n"
-  printf "Aborting...\n"
+if [[ $ret -ne 0 ]]; then
+  print_error "An error occured when generating loader. Aborting..."
   exit 1; 
 fi
 
-printf "Clearing database...\n\n"
+print_info "Clearing database..."
 ./remove_db.sh
 
 ret=$?
-if [[ $ret -eq 0 ]]; then
-  printf "Done!\n"
-else
-  printf "An error occured when removing old database\n"
-  printf "Aborting...\n"
+if [[ $ret -ne 0 ]]; then
+  print_error "An error occured when removing old database. Aborting..."
   exit 1; 
 fi
 
-printf "initializing fresh database and loading CSVs...\n\n"
+print_info "Initializing fresh database and loading CSVs"
 ./init_db.sh
 
 ret=$?
-if [[ $ret -eq 0 ]]; then
-printf "Done!\n"
-else
-  printf "An error occured when initializing the database\n"
-  printf "Aborting...\n"
+if [[ $ret -ne 0 ]]; then
+  print_error "An error occured when initializing the database. Aborting..."
   exit 1; 
 fi
+
+print_pipeline_success $((SECONDS-start))
