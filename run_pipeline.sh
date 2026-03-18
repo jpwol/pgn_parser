@@ -2,8 +2,6 @@
 source "$(dirname "$0")/common.sh"
 start=$SECONDS
 
-clear
-
 dir=$(pwd)
 
 print_header "run_pipeline.sh"
