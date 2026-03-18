@@ -14,20 +14,21 @@ print_header() {
 }
 
 print_info() {
-  msg=$1
+  local msg=$1
   printf "[${BLUE}INFO${RESET}]: ${msg}\n"
 }
 
 print_error() {
-  msg=$1
+  local msg=$1
   printf "[${BOLD}${RED}ERROR${RESET}]: ${msg}\n"
 }
 
 print_success() {
-  msg=$1
+  local msg=$1
   printf "[${GREEN}DONE${RESET}]: Took ${msg} seconds\n"
 }
 
 print_pipeline_success() {
+  local msg=$1
   printf "[${GREEN}DONE${RESET}]: Pipeline took ${msg} seconds\n"
 }
