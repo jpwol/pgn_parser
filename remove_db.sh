@@ -3,8 +3,8 @@
 printf "remove_db.sh\n"
 printf "=====================\n\n"
 
-printf "Removing existing database \"chess_db\"...\n"
-mariadb -e "DROP DATABASE IF EXISTS chess_db"
+printf "Removing existing database \"chess\" if it exists...\n"
+mariadb -e "DROP DATABASE IF EXISTS chess"
 
 if [[ $? -eq 0 ]]; then
   exit $?

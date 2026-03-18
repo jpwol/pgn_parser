@@ -30,13 +30,21 @@ for i in "${CSV_FILES[@]}"; do
     exit 1
   else
     printf "Located %s in %s\n" "$i" "$EMIT_DIR"
+    # printf "Copying CSV file %s to \"/tmp\"\n" "$i"
+    # cp "$EMIT_DIR/$i" "/tmp"
+
+    if [[ ! -f "/tmp/$i" ]]; then
+      printf "Copy failed. Aborting.\n"
+      exit 1
+    fi
   fi
 done
+
 
 printf "\nEmitting SQL to %s\n" "$CURRENT_DIR/$OUTPUT_FILE"
 
 SQL_STRING="SET NAMES latin1;
-USE chess_db;
+USE chess;
 
 SET foreign_key_checks = 0;
 ALTER TABLE players DISABLE KEYS;

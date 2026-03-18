@@ -10,7 +10,7 @@ mariadb < ./schema.sql
 
 printf "Loading CSV files into database...\n"
 if [[ -f $INSERT_FILE ]]; then
-  mariadb --local-infile=1 < $INSERT_FILE
+  mariadb < $INSERT_FILE
   exit $?
 else
   echo "error: file not found"
