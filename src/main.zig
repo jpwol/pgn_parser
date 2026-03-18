@@ -125,6 +125,9 @@ pub fn main() !void {
     try writer.flush();
     try rw.seekTo(0);
 
+    var invalid_games: u32 = 0;
+    var skipped_games: u32 = 0;
+
     while (true) {
         const line = try reader.takeDelimiter('\n');
         if (line == null) break;
@@ -142,6 +145,8 @@ pub fn main() !void {
                     if (h.isGameValid(&g) and depth_paren == 0 and depth_curly == 0) {
                         try e.emitGameCSV(&g, game_id, &players_map, players_writer, games_writer, moves_writer);
                         game_id += 1;
+                    } else {
+                        invalid_games += 1;
                     }
 
                     g = std.mem.zeroes(Game);
@@ -152,6 +157,8 @@ pub fn main() !void {
 
                     move_number = 0;
                     next_player = 'W';
+                } else {
+                    skipped_games += 1;
                 }
                 state = .waiting;
             } else if (state == .in_headers) {
@@ -214,11 +221,17 @@ pub fn main() !void {
     if (g.move_count > 0 and g.white.len > 0 and g.black.len > 0) {
         if (h.isGameValid(&g)) {
             try e.emitGameCSV(&g, game_id, &players_map, players_writer, games_writer, moves_writer);
+        } else {
+            invalid_games += 1;
         }
     }
 
     try h.printProgressBar(writer, current_line, total_lines, 30);
     try writer.writeByte('\n');
+    try h.print_warn(writer);
+    try writer.print("Invalid games found: {d}\n", .{invalid_games});
+    try h.print_warn(writer);
+    try writer.print("Skipped games found: {d}\n", .{skipped_games});
     try writer.flush();
     try players_writer.flush();
     try games_writer.flush();
