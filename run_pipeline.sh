@@ -13,11 +13,17 @@ zig build || {
   print_error "Build failed. Aborting..."
   exit 1; 
 }
+print_success $((SECONDS-start))
 
 print_info "Executing ${dir}/bin/pgn_parser with file \"${INFILE}\"" 
+parser_start=$SECONDS
+
 print_header "pgn_parser"
-./bin/pgn_parser "$INFILE"
-print_success $((SECONDS-start))
+./bin/pgn_parser "$INFILE" || {
+  print_error "Parsing failed. Aborting..."
+  exit 1
+}
+print_success $((SECONDS-parser_start))
 
 print_info "Generating loader"
 ./generate_loader.sh
@@ -46,3 +52,4 @@ if [[ $ret -ne 0 ]]; then
 fi
 
 print_pipeline_success $((SECONDS-start))
+print_completion

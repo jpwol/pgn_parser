@@ -32,3 +32,10 @@ print_pipeline_success() {
   local msg=$1
   printf "[${GREEN}DONE${RESET}]: Pipeline took ${msg} seconds\n"
 }
+
+print_completion() {
+  print_info "Pipeline completed successfully."
+  print_info "Use 'mariadb chess -e <QUERY>' to run manual queries" 
+  print_info "Or use 'mariadb --table chess <tests/<file>"
+  print_info "to run the included test queries"
+}
