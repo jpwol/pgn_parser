@@ -1,7 +1,9 @@
-output.sql
-bin/
-.zig-cache/
-zig-out/
 .git/
+.zig-cache/
+bin/
+emit/
+.gitignore
+README.md
+load.sql
+zig-out/
 *.pgn
-*.bak

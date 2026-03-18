@@ -1,5 +1,5 @@
-load.sql
-*.pgn
 .zig-cache
 /bin
 /emit
+load.sql
+*.pgn
