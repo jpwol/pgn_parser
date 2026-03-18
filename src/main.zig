@@ -36,7 +36,9 @@ pub fn main() !void {
     try writer.flush();
 
     try writer.writeAll("Creating directory \"emit\".\n");
-    std.fs.cwd().makeDir("emit") catch |err| {
+    if (std.fs.cwd().makeDir("emit")) |_| {
+        try writer.writeAll("Directory \"emit\" created successfully.\n");
+    } else |err| {
         switch (err) {
             std.fs.Dir.MakeError.PathAlreadyExists => try writer.writeAll("Directory \"emit\" already exists, skipping...\n"),
             else => {
@@ -44,8 +46,7 @@ pub fn main() !void {
                 return;
             },
         }
-    };
-    try writer.writeAll("Directory \"emit\" created successfully.\n");
+    }
     try writer.flush();
 
     try writer.writeAll("Creating file \"emit/players.csv\".\n");
