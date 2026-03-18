@@ -28,36 +28,47 @@ pub fn main() !void {
 
     const file_string = args[1];
     const pgn_file = std.fs.cwd().openFile(file_string, .{}) catch |err| {
-        try err_writer.print("error: couldn't open file {s}: {}\n", .{ file_string, err });
+        try h.print_error(err_writer);
+        try err_writer.print("Couldn't open file {s}: {}\n", .{ file_string, err });
         return;
     };
     defer pgn_file.close();
-    try writer.print("File \"{s}\" opened successfully.\n", .{file_string});
+    try h.print_info(writer);
+    try writer.print("File \"{s}\" opened successfully\n", .{file_string});
     try writer.flush();
 
-    try writer.writeAll("Creating directory \"emit\".\n");
+    try h.print_info(writer);
+    try writer.writeAll("Creating directory \"emit\"\n");
     if (std.fs.cwd().makeDir("emit")) |_| {
-        try writer.writeAll("Directory \"emit\" created successfully.\n");
+        try h.print_info(writer);
+        try writer.writeAll("Directory \"emit\" created successfully\n");
     } else |err| {
         switch (err) {
-            std.fs.Dir.MakeError.PathAlreadyExists => try writer.writeAll("Directory \"emit\" already exists, skipping...\n"),
+            std.fs.Dir.MakeError.PathAlreadyExists => {
+                try h.print_warn(writer);
+                try writer.writeAll("Directory \"emit\" already exists, skipping...\n");
+            },
             else => {
-                try err_writer.print("error: {}\n", .{err});
+                try h.print_error(err_writer);
+                try err_writer.print("{}\n", .{err});
                 return;
             },
         }
     }
     try writer.flush();
 
-    try writer.writeAll("Creating file \"emit/players.csv\".\n");
+    try h.print_info(writer);
+    try writer.writeAll("Creating file \"emit/players.csv\"\n");
     const players_file = try std.fs.cwd().createFile("./emit/players.csv", .{});
     defer players_file.close();
 
-    try writer.writeAll("Creating file \"emit/games.csv\".\n");
+    try h.print_info(writer);
+    try writer.writeAll("Creating file \"emit/games.csv\"\n");
     const games_file = try std.fs.cwd().createFile("./emit/games.csv", .{});
     defer games_file.close();
 
-    try writer.writeAll("Creating file \"emit/moves.csv\".\n");
+    try h.print_info(writer);
+    try writer.writeAll("Creating file \"emit/moves.csv\"\n");
     const moves_file = try std.fs.cwd().createFile("./emit/moves.csv", .{});
     defer moves_file.close();
 
@@ -104,11 +115,13 @@ pub fn main() !void {
     const ParseState = enum { waiting, in_headers, in_moves };
     var state: ParseState = .waiting;
 
-    try writer.writeAll("\nGetting file line count.\n");
+    try h.print_info(writer);
+    try writer.writeAll("Getting file line count\n");
     try writer.flush();
     const total_lines = try h.getLineCount(reader);
     var current_line: u32 = 0;
-    try writer.print("\nTotal lines in file: {d}\n", .{total_lines});
+    try h.print_info(writer);
+    try writer.print("Total lines in file: {d}\n", .{total_lines});
     try writer.flush();
     try rw.seekTo(0);
 
@@ -203,10 +216,9 @@ pub fn main() !void {
             try e.emitGameCSV(&g, game_id, &players_map, players_writer, games_writer, moves_writer);
         }
     }
-    // try writer.writeAll("ALTER TABLE moves ENABLE KEYS;\n");
-    // try writer.writeAll("ALTER TABLE games ENABLE KEYS;\n");
-    // try writer.writeAll("ALTER TABLE players ENABLE KEYS;\n");
-    // try writer.writeAll("COMMIT;\n");
+
+    try h.printProgressBar(writer, current_line, total_lines, 30);
+    try writer.writeByte('\n');
     try writer.flush();
     try players_writer.flush();
     try games_writer.flush();

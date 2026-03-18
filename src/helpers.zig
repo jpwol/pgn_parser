@@ -127,3 +127,15 @@ pub fn isGameValid(g: *Game) bool {
     // }
     return true;
 }
+
+pub fn print_error(writer: *Writer) !void {
+    try writer.writeAll("[\x1b[1m\x1b[31mERROR\x1b[0m]: ");
+}
+
+pub fn print_info(writer: *Writer) !void {
+    try writer.writeAll("[\x1b[34mINFO\x1b[0m]: ");
+}
+
+pub fn print_warn(writer: *Writer) !void {
+    try writer.writeAll("[\x1b[33mWARNING\x1b[0m]: ");
+}
