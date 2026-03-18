@@ -4,6 +4,15 @@ pgn_parser parses .pgn files (who would've thought) and emits CSV files based on
 
 There are provided test queries to make sure the database was populated correctly.
 
+#### Table of Contents
+
+- [Requirements](#requirements)
+- [Manual Setup](#manual-setup)
+- [Auto Setup](#automatic-docker)
+- [Running](#running)
+- [Tests](#tests)
+- [Tips](#tips)
+
 ### Requirements
 
 - Zig 0.15.2
@@ -42,6 +51,11 @@ Additionally, you'll need MariaDB/MySQL, however it's provided for your distrobu
 > user=<your username>
 > password=<your password>
 > ```
+
+> [!Note]
+> For large PGN files, it's worth noting that a small buffer pool size will drastically increase database insertion times.
+>
+> To speed things up, you may want to increase this. Refer to [Tips](#tips) for instructions.
 
 #### Automatic (Docker)
 
@@ -84,3 +98,47 @@ mariadb chess < tests/file
 # or for pretty output,
 mariadb --table chess < tests/file
 ```
+
+### Tips
+
+#### Buffer Pool Size
+
+InnoDB is the storage engine for MariaDB/MySQL. By default, InnoDB usually has a buffer pool size of 128MB. This size is sufficient for batch insertion, but for bulk inserts like with the CSV files emmitted from the parser, it might not cut it.
+
+Depending on how much physical memory you have, the value you'd wish to set this to may change.
+
+Also note that InnoDB recommends you set the buffer pool size as a multiple of the buffer pool chunk size. If you are on a recent version of MariaDB (10.5+), this has been deprecated, but if you aren't, you can check it with `mariadb -e "SHOW VARIABLES LIKE 'innodb_buffer_pool_chunk_size'"`.
+
+**Arch Linux**
+
+On Arch, you can permanently increase your buffer pool size by either
+
+1. Editing `/etc/my.cnf`
+
+```cnf
+
+[client-server]            # look for or create this header
+innodb_buffer_pool_size=4G # insert this line with whatever value you please
+```
+
+2. Editing `/etc/my.cnf.d/server.cnf`
+
+```cnf
+[mysqld]                   # look for this header
+innodb_buffer_pool_size=4G # again, this is the line you want to insert
+```
+
+**Ubuntu**
+
+As far as I'm aware, you'd want to edit `/etc/mysql/mariadb.conf.d/50-server.cnf`:
+
+```cnf
+[mysqld]                   # look for this header
+innodb_buffer_pool_size=4G # again, this is the line you want to insert
+```
+
+As I don't have an Ubuntu machine, this could be wrong, so do some investigating yourself.
+
+**Other Distros or OS**
+
+Unfortunately, I have no clue. It's most likely very similar to what's been mentioned above, just do some snooping.
