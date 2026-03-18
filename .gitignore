@@ -1,9 +1,5 @@
-*.sql
-testfile
-testoutput
+load.sql
 *.pgn
-*.pgn.bak
 .zig-cache
 /bin
-test*
 /emit
