@@ -7,8 +7,9 @@ There are provided test queries to make sure the database was populated correctl
 #### Table of Contents
 
 - [Requirements](#requirements)
-- [Manual Setup](#manual-setup)
-- [Auto Setup](#automatic-docker)
+- [Building](#building)
+  - [Manual Setup](#manual-setup)
+  - [Auto Setup](#automatic-docker)
 - [Running](#running)
 - [Tests](#tests)
 - [Tips](#tips)
@@ -19,6 +20,8 @@ There are provided test queries to make sure the database was populated correctl
 - MariaDB/MySQL \
   OR
 - Docker
+
+### Building
 
 #### Manual Setup
 
@@ -80,6 +83,14 @@ Where 4G could be any value that you wish. The default is 1G.
 
 Assuming you want to run it manually, the scripts provided make it very easy.
 After running `zig build`, you'll want to run the `run_pipeline.sh` script. This script takes a PGN file as an argument, and the default value is `infile.pgn`.
+
+```bash
+# if using a file NOT named 'infile.pgn'
+./run_pipeline.sh <file>
+
+# if using a file named 'infile.pgn'
+./run_pipeline.sh
+```
 
 You can run any part of the pipeline separately though.
 
