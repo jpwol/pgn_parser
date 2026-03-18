@@ -8,7 +8,7 @@ const Writer = std.io.Writer;
 const h = @import("helpers.zig");
 const e = @import("emitter.zig");
 
-pub fn main() !void {
+pub fn main() !u8 {
     const stdout = std.fs.File.stdout();
     const stderr = std.fs.File.stderr();
     var buf: [1024]u8 = undefined;
@@ -23,14 +23,14 @@ pub fn main() !void {
 
     if (args.len != 2) {
         try err_writer.print("usage: parse <file>\n", .{});
-        return;
+        return 1;
     }
 
     const file_string = args[1];
     const pgn_file = std.fs.cwd().openFile(file_string, .{}) catch |err| {
         try h.print_error(err_writer);
         try err_writer.print("Couldn't open file {s}: {}\n", .{ file_string, err });
-        return;
+        return 1;
     };
     defer pgn_file.close();
     try h.print_info(writer);
@@ -51,7 +51,7 @@ pub fn main() !void {
             else => {
                 try h.print_error(err_writer);
                 try err_writer.print("{}\n", .{err});
-                return;
+                return 1;
             },
         }
     }
@@ -236,4 +236,6 @@ pub fn main() !void {
     try players_writer.flush();
     try games_writer.flush();
     try moves_writer.flush();
+
+    return 0;
 }
