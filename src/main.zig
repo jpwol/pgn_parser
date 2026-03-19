@@ -127,6 +127,7 @@ pub fn main() !u8 {
 
     var invalid_games: u32 = 0;
     var skipped_games: u32 = 0;
+    var valid_games: u32 = 0;
 
     while (true) {
         const line = try reader.takeDelimiter('\n');
@@ -144,6 +145,7 @@ pub fn main() !u8 {
                 if (g.move_count > 0 and g.white.len > 0 and g.black.len > 0) {
                     if (h.isGameValid(&g) and depth_paren == 0 and depth_curly == 0) {
                         try e.emitGameCSV(&g, game_id, &players_map, players_writer, games_writer, moves_writer);
+                        valid_games += 1;
                         game_id += 1;
                     } else {
                         invalid_games += 1;
@@ -221,6 +223,7 @@ pub fn main() !u8 {
     if (g.move_count > 0 and g.white.len > 0 and g.black.len > 0) {
         if (h.isGameValid(&g)) {
             try e.emitGameCSV(&g, game_id, &players_map, players_writer, games_writer, moves_writer);
+            valid_games += 1;
         } else {
             invalid_games += 1;
         }
@@ -228,10 +231,18 @@ pub fn main() !u8 {
 
     try h.printProgressBar(writer, current_line, total_lines, 30);
     try writer.writeByte('\n');
-    try h.print_warn(writer);
-    try writer.print("Invalid games found: {d}\n", .{invalid_games});
-    try h.print_warn(writer);
-    try writer.print("Skipped games found: {d}\n", .{skipped_games});
+    try h.print_info(writer);
+    try writer.print("Valid games: {d}\n", .{valid_games});
+    if (invalid_games > 0) {
+        try h.print_warn(writer);
+        try writer.print("Invalid games: {d}\n", .{invalid_games});
+    }
+    if (skipped_games > 0) {
+        try h.print_warn(writer);
+        try writer.print("Skipped games: {d}\n", .{skipped_games});
+    }
+    try h.print_info(writer);
+    try writer.print("Total games: {d}\n", .{valid_games + invalid_games + skipped_games});
     try writer.flush();
     try players_writer.flush();
     try games_writer.flush();
