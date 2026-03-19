@@ -1,5 +1,21 @@
 #!/usr/bin/env bash
 
+# environment variables for MariaDB
+# necessary to set these here so the user can run the pipeline
+# or have docker run it
+DB_HOST=${MARIADB_HOST:-localhost}
+DB_USER=${MARIADB_USER:-$(whoami)}
+DB_PASS=${MARIADB_PASSWORD:-}
+DB_NAME=${DB_NAME:-chess}
+
+if [[ -n "$DB_PASS" ]]; then
+  MARIADB_CONN="-h $DB_HOST -u $DB_USER -p$DB_PASS"
+else
+  MARIADB_CONN="-h $DB_HOST -u $DB_USER"
+fi
+
+MARIADB_OPTS="$MARIADB_CONN $DB_NAME"
+
 RESET="\033[0m"
 GREEN="\033[32m"
 RED="\033[31m"

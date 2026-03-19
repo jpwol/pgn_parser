@@ -1,0 +1,41 @@
+services:
+  parser:
+    build: .
+    environment:
+      - MARIADB_HOST=db
+      - MARIADB_USER=root
+      - MARIADB_PASSWORD=root
+      - PGN_FILE=${PGN_FILE:-infile.pgn}
+    volumes:
+      - ./:/app/input
+      - chess-db:/var/lib/mysql
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:latest
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: chess
+      MARIADB_USER: chess_user
+      MARIADB_PASSWORD: chess_pass
+      MARIADB_ROOT_HOST: '%'
+    volumes:
+      - chess-db:/var/lib/mysql
+      - ./mariadb.cnf:/etc/mysql/conf.d/custom.cnf
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+
+volumes:
+  chess-db:
+  

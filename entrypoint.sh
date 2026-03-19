@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
-BUFFER_POOL=${INNODB_BUFFER_POOL:-1G}
-echo "[mysqld]" > /etc/mysql/conf.d/innodb.cnf
-echo "innodb_buffer_pool_size=$BUFFER_POOL" >> /etc/mysql/conf.d/innodb.cnf
+source "$(dirname "$0")/common.sh"
 
-service mariadb start
-
-./run_pipeline.sh
-
-mariadb --table chess < ./tests/question1.sql
-mariadb --table chess < ./tests/question2.sql
-mariadb --table chess < ./tests/question3.sql
-mariadb --table chess < ./tests/question4.sql
+COUNT=$(mariadb -h db -u root -proot chess -e "SELECT COUNT(*) FROM games;" 2>/dev/null | tail -1)
+if [[ "$COUNT" -gt 0 ]]; then
+  print_info "Database already populated with $COUNT games, skipping pipeline..."
+else
+  ./run_pipeline.sh /app/input/${PGN_FILE}
+fi
