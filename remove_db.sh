@@ -6,11 +6,12 @@ print_header "remove_db.sh"
 
 print_info "Removing existing database \"chess\" if it exists..."
 mariadb -e "DROP DATABASE IF EXISTS chess"
+ret=$?
 
-if [[ $? -eq 0 ]]; then
+if [[ $ret -eq 0 ]]; then
   print_success $((SECONDS-start))
-  exit $?
+  exit 0
 else
   print_error "An error occurred when removing the database."
-  exit $?
+  exit 1
 fi
