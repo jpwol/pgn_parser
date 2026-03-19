@@ -31,10 +31,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
-    deploy:
-      resources:
-        limits:
-          memory: 6G
 
 volumes:
   chess-db:
