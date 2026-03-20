@@ -14,7 +14,7 @@ There are provided test queries to make sure the database was populated correctl
 - [Tests](#tests)
 - [Tips](#tips)
 
-### Requirements
+#### Requirements
 
 - Zig 0.15.2
 - MariaDB/MySQL \
@@ -23,6 +23,8 @@ There are provided test queries to make sure the database was populated correctl
 - Docker Compose
 
 ### Building
+
+---
 
 > [!Important]
 > See [Automatic (Docker)](#automatic-docker) for building and running in an isolated environment
@@ -63,6 +65,8 @@ Additionally, you'll need MariaDB/MySQL, however it's provided for your distrobu
 > To speed things up, you may want to increase this. Refer to [Tips](#tips) for instructions.
 
 ### Running
+
+---
 
 #### Manually
 
@@ -134,6 +138,8 @@ mariadb --table chess < tests/file
 ```
 
 ### Tips
+
+---
 
 #### Buffer Pool Size
 
