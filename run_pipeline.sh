@@ -6,7 +6,7 @@ dir=$(pwd)
 
 print_header "run_pipeline.sh"
 
-INFILE="${1:-infile.pgn}"
+INFILE="${1:-testfile.pgn}"
 
 print_info "Building binary"
 zig build || { 

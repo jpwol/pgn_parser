@@ -6,4 +6,4 @@ emit/
 README.md
 load.sql
 zig-out/
-*.pgn
+infile.pgn

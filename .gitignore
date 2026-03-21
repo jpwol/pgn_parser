@@ -2,4 +2,4 @@
 /bin
 /emit
 load.sql
-*.pgn
+infile.pgn

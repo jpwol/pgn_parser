@@ -13,17 +13,27 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
     - name: Start services
       run: docker compose up -d --build
-    - name: Wait for services to be healthy
+
+    - name: Wait for parser to complete
       run: |
-        echo "Waiting for services..."
-        sleep 10
+        echo "Waiting for parser container to finish..."
+        docker compose wait parser
+        EXIT_CODE=$?
+        if [ $EXIT_CODE -ne 0 ]; then
+          echo "Parser failed with exit code $EXIT_CODE"
+          exit $EXIT_CODE
+        fi
+
     - name: Check running containers
       run: docker compose ps
+
     - name: Run tests
       run: |
-        docker compose exec pgn_parser-db-1 -u root -proot chess < tests/question1.sql
+        docker compose exec -T db mariadb -u root -proot chess < tests/question1.sql
+
     - name: Print logs on failure
       if: failure()
       run: docker compose logs

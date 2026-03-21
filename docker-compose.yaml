@@ -5,7 +5,7 @@ services:
       - MARIADB_HOST=db
       - MARIADB_USER=root
       - MARIADB_PASSWORD=root
-      - PGN_FILE=${PGN_FILE:-infile.pgn}
+      - PGN_FILE=${PGN_FILE:-testfile.pgn}
     volumes:
       - ./:/app/input
       - chess-db:/var/lib/mysql
