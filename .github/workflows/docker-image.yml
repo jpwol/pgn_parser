@@ -1,0 +1,33 @@
+name: Docker Compose CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Start services
+      run: docker compose up -d --build
+    - name: Wait for services to be healthy
+      run: |
+        echo "Waiting for services..."
+        sleep 10
+    - name: Check running containers
+      run: docker compose ps
+    - name: Run tests
+      run: |
+        docker compose exec db-1 -u root -proot chess < tests/question1.sql
+    - name: Print logs on failure
+      if: failure()
+      run: docker compose logs
+
+    - name: Tear down
+      if: always()
+      run: docker compose down -v
