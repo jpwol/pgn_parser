@@ -23,7 +23,7 @@ jobs:
       run: docker compose ps
     - name: Run tests
       run: |
-        docker compose exec db-1 -u root -proot chess < tests/question1.sql
+        docker compose exec pgn_parser-db-1 -u root -proot chess < tests/question1.sql
     - name: Print logs on failure
       if: failure()
       run: docker compose logs
