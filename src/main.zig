@@ -93,7 +93,6 @@ pub fn main() !u8 {
     defer players_map.deinit();
 
     var g: Game = std.mem.zeroes(Game);
-    // var ply: u32 = 0;
     var game_id: u32 = 1;
     var move_number: u32 = 0;
     var next_player: u8 = 'W';

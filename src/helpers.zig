@@ -121,10 +121,6 @@ pub fn isGameValid(g: *Game) bool {
         const diff = if (a > b) a - b else b - a;
         if (diff > 2) return false;
     }
-    // if (g.move_count >= 10) {
-    //     const last_move_number = g.moves[g.move_count - 1].move_number;
-    //     if (last_move_number < g.move_count / 3) return false;
-    // }
     return true;
 }
 

@@ -1,5 +1,4 @@
 pub const Move = struct {
-    // ply: u32,
     move_number: u32,
     player: u8,
     move_text: []const u8,
