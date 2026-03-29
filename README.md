@@ -16,7 +16,7 @@ There are provided test queries to make sure the database was populated correctl
 
 #### Requirements
 
-- Zig 0.15.2
+- Zig >= 0.15
 - MariaDB/MySQL \
   OR
 - Docker
