@@ -71,13 +71,13 @@ Additionally, you'll need MariaDB/MySQL, however it's provided for your distrobu
 #### Manually
 
 Assuming you want to run it manually, the scripts provided make it very easy.
-After running `zig build`, you'll want to run the `run_pipeline.sh` script. This script takes a PGN file as an argument, and the default value is `infile.pgn`.
+After running `zig build`, you'll want to run the `run_pipeline.sh` script. This script takes a PGN file as an argument, and the default value is `testfile.pgn`.
 
 ```bash
-# if using a file NOT named 'infile.pgn'
+# if using a file NOT named 'testfile.pgn'
 ./run_pipeline.sh <file>
 
-# if using a file named 'infile.pgn'
+# if using a file named 'testfile.pgn'
 ./run_pipeline.sh
 ```
 
