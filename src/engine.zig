@@ -31,11 +31,7 @@ pub const Game_Engine = struct {
 
     pub fn evaluate(self: *Game_Engine, game: Game, game_id: u32, writer: *Writer) !void {
         for (game.moves[0..game.move_count]) |m| {
-            // std.debug.print("raw move bytes: ", .{});
-            // for (m.move_text) |b| std.debug.print("{d} ", .{b});
-            // std.debug.print("\n", .{});
             const move_text = m.move_text;
-            // std.debug.print("{s}\n", .{move_text});
             
             if (move_text.len == 0) continue;
             if (move_text[0] == '-' or move_text[0] == '1' or move_text[0] == '0') continue;
@@ -50,13 +46,11 @@ pub const Game_Engine = struct {
                     return;
                 }
             }
-            const state = if (m.player == 'W') self.state.white_pawn else self.state.black_pawn;
-            _ = state;
-            const pawns = if (m.player == 'W') @popCount(self.state.white_pawn) else @popCount(self.state.black_pawn);
+            const pawns   = if (m.player == 'W') @popCount(self.state.white_pawn)   else @popCount(self.state.black_pawn);
             const knights = if (m.player == 'W') @popCount(self.state.white_knight) else @popCount(self.state.black_knight);
             const bishops = if (m.player == 'W') @popCount(self.state.white_bishop) else @popCount(self.state.black_bishop);
-            const rooks = if (m.player == 'W') @popCount(self.state.white_rook) else @popCount(self.state.black_rook);
-            const queens = if (m.player == 'W') @popCount(self.state.white_queen) else @popCount(self.state.black_queen);
+            const rooks   = if (m.player == 'W') @popCount(self.state.white_rook)   else @popCount(self.state.black_rook);
+            const queens  = if (m.player == 'W') @popCount(self.state.white_queen)  else @popCount(self.state.black_queen);
             try writer.print("{d},{d},{c},{d},{d},{d},{d},{d}\n", .{
                 game_id,
                 m.move_number,
@@ -68,7 +62,6 @@ pub const Game_Engine = struct {
                 queens,
             });
 
-            // self.sanityCheck();
             // self.dumpBoardState();
         }
         self.state = .{};
@@ -77,10 +70,6 @@ pub const Game_Engine = struct {
     fn squareToBit(square: []const u8) u6 {
         const file = square[0];
         const rank = square[1];
-        if (rank < '1' or rank > '8' or file < 'a' or file > 'h') {
-            std.debug.print("BAD SQUARE: file={c}({d}) rank={c}({d})\n", .{file, file, rank, rank});
-            return 0;
-        }
 
         return @intCast(((rank - '1') * 8) + ('h' - file));
     }
@@ -117,9 +106,9 @@ pub const Game_Engine = struct {
 
     pub fn getCurrentBoardState(self: *Game_Engine) u64 {
         const board = self.state.white_pawn | self.state.white_knight | self.state.white_bishop |
-            self.state.white_rook | self.state.white_king | self.state.white_queen |
-            self.state.black_pawn | self.state.black_knight | self.state.black_bishop |
-            self.state.black_rook | self.state.black_king | self.state.black_queen;
+                      self.state.white_rook | self.state.white_king   | self.state.white_queen  |
+                      self.state.black_pawn | self.state.black_knight | self.state.black_bishop |
+                      self.state.black_rook | self.state.black_king   | self.state.black_queen;
 
         return board;
     }
@@ -333,8 +322,8 @@ pub const Game_Engine = struct {
                     if (disambig) |d| {
                         // d is source file letter e.g. 'c', convert to bit-file index
                         const src_file: u8 = 'h' - d;
-                        // dest_bit - 8 puts us on the same file as dest but one rank back,
-                        // then we mask off the file bits and add our source file
+                        // dest_bit - 8 puts on the same file as dest but one rank back,
+                        // then mask off the file bits and add the source file
                         const src_bit: u8 = (dest_bit - 8) & ~@as(u8, 7) | src_file;
                         std.debug.assert(board & (@as(u64, 1) << @intCast(src_bit)) != 0);
                         return src_bit;
@@ -432,7 +421,7 @@ pub const Game_Engine = struct {
                         current += dir;
                         if (current < 0 or current >= 64) break;
                         const new_rank = @divFloor(current, 8);
-                        // for horizontal movement, stop if we crossed a rank
+                        // for horizontal movement, stop if crossed a rank
                         if ((dir == @as(i8, 1) or dir == @as(i8, -1)) and new_rank != prev_rank) break;
                         const bit: u8 = @intCast(current);
 
@@ -461,9 +450,9 @@ pub const Game_Engine = struct {
                         if (current < 0 or current >= 64) break;
                         const new = @mod(current, 8);
                         const new_rank = @divFloor(current, 8);
-                        // horizontal wrap check (rook-like dirs)
+
                         if ((dir == 1 or dir == -1) and new_rank != prev_rank) break;
-                        // diagonal wrap check (bishop-like dirs)
+
                         if ((dir == 9 or dir == -9 or dir == 7 or dir == -7) and @abs(new - prev) != 1) break;
                         const bit: u8 = @intCast(current);
 
@@ -537,16 +526,15 @@ pub const Game_Engine = struct {
         placeBitboard(&board, self.state.white_bishop, 'B');
         placeBitboard(&board, self.state.white_rook,   'R');
         placeBitboard(&board, self.state.white_queen,  'Q');
-        placeBitboard(&board, self.state.white_king,    'K');
+        placeBitboard(&board, self.state.white_king,   'K');
 
         placeBitboard(&board, self.state.black_pawn,   'p');
         placeBitboard(&board, self.state.black_knight, 'n');
         placeBitboard(&board, self.state.black_bishop, 'b');
         placeBitboard(&board, self.state.black_rook,   'r');
         placeBitboard(&board, self.state.black_queen,  'q');
-        placeBitboard(&board, self.state.black_king,    'k');
+        placeBitboard(&board, self.state.black_king,   'k');
 
-    // Print (top = rank 8)
     var r: i32 = 7;
     while (r >= 0) : (r -= 1) {
         std.debug.print("{} ", .{r + 1});
@@ -559,22 +547,14 @@ pub const Game_Engine = struct {
         var bits = bb;
 
         while (bits != 0) {
-            const sq: u6 = @intCast(@ctz(bits)); // index of least significant bit
+            const sq: u6 = @intCast(@ctz(bits));
 
             const rank = sq / 8;
             const file = sq % 8;
 
             board[rank][file] = piece;
 
-            bits &= bits - 1; // clear lowest set bit
+            bits &= bits - 1;
         }
-    }
-    fn sanityCheck(self: *Game_Engine) void {
-        const overlap =
-    (self.state.white_pawn & self.state.black_pawn) |
-    (self.state.white_knight & self.state.black_knight) |
-    (self.state.white_bishop & self.state.black_bishop);
-
-        std.debug.assert(overlap == 0);
     }
 };
