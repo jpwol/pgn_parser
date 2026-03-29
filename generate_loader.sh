@@ -65,7 +65,14 @@ LOAD DATA LOCAL INFILE '$EMIT_DIR/moves.csv'
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '\"'
     LINES TERMINATED BY '\\n'
-    (game_id, move_number, player, move_text, is_capture, is_castle, captured_piece);
+    (game_id, move_number, player, move_text);
+
+LOAD DATA LOCAL INFILE '$EMIT_DIR/state.csv'
+    IGNORE INTO TABLE state
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '\"'
+    LINES TERMINATED BY '\\n'
+    (game_id, move_number, player, pawns, knights, bishops, rooks, queens);
 
 ALTER TABLE moves ENABLE KEYS;
 ALTER TABLE games ENABLE KEYS;

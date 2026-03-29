@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS players(
   name VARCHAR(50) NOT NULL, 
   UNIQUE(name)
 );
+
 CREATE TABLE IF NOT EXISTS games(
   id INT PRIMARY KEY,
   white_player_id INT NOT NULL,
@@ -13,6 +14,7 @@ CREATE TABLE IF NOT EXISTS games(
   FOREIGN KEY(white_player_id) REFERENCES players(id),
   FOREIGN KEY(black_player_id) REFERENCES players(id)
 );
+
 CREATE TABLE IF NOT EXISTS moves(
   game_id INT NOT NULL,
   move_number INT NOT NULL,
@@ -21,13 +23,23 @@ CREATE TABLE IF NOT EXISTS moves(
     'B'
   ) NOT NULL,
   move_text VARCHAR(10) NOT NULL,
-  is_capture BOOLEAN DEFAULT FALSE,
-  is_castle BOOLEAN DEFAULT FALSE,
-  captured_piece CHAR(1),
 
   PRIMARY KEY (game_id, move_number, player),
-
   FOREIGN KEY(game_id) REFERENCES games(id)
+);
+
+CREATE TABLE IF NOT EXISTS state(
+  game_id     INT NOT NULL,
+  move_number INT NOT NULL,
+  player      ENUM('W','B') NOT NULL,
+  pawns       TINYINT UNSIGNED NOT NULL DEFAULT 8,
+  knights     TINYINT UNSIGNED NOT NULL DEFAULT 2,
+  bishops     TINYINT UNSIGNED NOT NULL DEFAULT 2,
+  rooks       TINYINT UNSIGNED NOT NULL DEFAULT 2,
+  queens      TINYINT UNSIGNED NOT NULL DEFAULT 1,
+
+  PRIMARY KEY (game_id, move_number, player),
+  FOREIGN KEY (game_id, move_number, player) REFERENCES moves(game_id, move_number, player)
 );
 
 CREATE INDEX IF NOT EXISTS idx_games_white_player ON games(white_player_id);
