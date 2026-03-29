@@ -28,14 +28,8 @@ pub fn emitGameCSV(g: *Game, game_id: u32, players: *std.StringHashMap(u32), pla
 
     for (0..g.move_count) |i| {
         const m = g.moves[i];
-        const is_capture: u1 = if (m.is_capture) 1 else 0;
-        const is_castle: u1 = if (m.is_castle) 1 else 0;
         try moves_writer.print("{d},{d},{c},", .{ game_id, m.move_number, m.player });
         try emitEscapedCSV(moves_writer, m.move_text);
-        if (m.captured_piece) |cp| {
-            try moves_writer.print(",{d},{d},{c}\n", .{ is_capture, is_castle, cp});
-        } else {
-            try moves_writer.print(",{d},{d},\n", .{ is_capture, is_castle });
-        }
+        try moves_writer.print("\n", .{});
     }
 }
