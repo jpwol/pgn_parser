@@ -7,6 +7,7 @@ const Writer = std.io.Writer;
 
 const h = @import("helpers.zig");
 const e = @import("emitter.zig");
+const Engine = @import("engine.zig").Game_Engine;
 
 pub fn main() !u8 {
     const stdout = std.fs.File.stdout();
@@ -72,22 +73,30 @@ pub fn main() !u8 {
     const moves_file = try std.fs.cwd().createFile("./emit/moves.csv", .{});
     defer moves_file.close();
 
+    try h.print_info(writer);
+    try writer.writeAll("Creating file \"emit/state.csv\"\n");
+    const state_file = try std.fs.cwd().createFile("./emit/state.csv", .{});
+    defer state_file.close();
+
     try writer.flush();
 
     var pgn_buf: [1024]u8 = undefined;
     var players_buf: [65536]u8 = undefined;
     var games_buf: [65536]u8 = undefined;
     var moves_buf: [65536]u8 = undefined;
+    var state_buf: [65536]u8 = undefined;
 
     var rw = pgn_file.reader(&pgn_buf);
     var pw = players_file.writer(&players_buf);
     var gw = games_file.writer(&games_buf);
     var mw = moves_file.writer(&moves_buf);
+    var sw = state_file.writer(&state_buf);
 
     const reader = &rw.interface;
     const players_writer = &pw.interface;
     const games_writer = &gw.interface;
     const moves_writer = &mw.interface;
+    const state_writer = &sw.interface;
 
     var players_map = std.StringHashMap(u32).init(allocator);
     defer players_map.deinit();
@@ -143,6 +152,8 @@ pub fn main() !u8 {
             if (state == .in_moves) {
                 if (g.move_count > 0 and g.white.len > 0 and g.black.len > 0) {
                     if (h.isGameValid(&g) and depth_paren == 0 and depth_curly == 0) {
+                        var engine: Engine = .{};
+                        try engine.evaluate(g, game_id, state_writer);
                         try e.emitGameCSV(&g, game_id, &players_map, players_writer, games_writer, moves_writer);
                         valid_games += 1;
                         game_id += 1;
@@ -209,9 +220,6 @@ pub fn main() !u8 {
                 m.move_number = move_number;
                 m.player = next_player;
                 m.move_text = try game_arena.allocator().dupe(u8, token);
-                m.is_capture = std.mem.containsAtLeast(u8, token, 1, "x");
-                m.is_castle = std.mem.containsAtLeast(u8, token, 1, "O-O");
-                m.captured_piece = if (m.is_capture) h.parseCapturedPiece(token) else null;
 
                 g.move_count += 1;
                 next_player = if (next_player == 'W') 'B' else 'W';
@@ -221,6 +229,8 @@ pub fn main() !u8 {
 
     if (g.move_count > 0 and g.white.len > 0 and g.black.len > 0) {
         if (h.isGameValid(&g)) {
+            var engine: Engine = .{};
+            try engine.evaluate(g, game_id, state_writer);
             try e.emitGameCSV(&g, game_id, &players_map, players_writer, games_writer, moves_writer);
             valid_games += 1;
         } else {
@@ -246,6 +256,7 @@ pub fn main() !u8 {
     try players_writer.flush();
     try games_writer.flush();
     try moves_writer.flush();
+    try state_writer.flush();
 
     return 0;
 }
